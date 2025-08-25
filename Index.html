@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>DAZZEL - Sistema de Ventas</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        :root {
+            --primary-color: #FF235E;
+            --primary-light: #FF4C7A;
+            --primary-dark: #E01E54;
+            --secondary-color: #1A1A1A;
+            --background-color: #FFF8F8;
+            --background-gradient: linear-gradient(135deg, #FFF8F8 0%, #FFE8ED 100%);
+            --text-color: #2D2D2D;
+            --text-light: #666666;
+            --white-color: #FFFFFF;
+            --shadow-light: rgba(255, 35, 94, 0.1);
+            --shadow-medium: rgba(255, 35, 94, 0.2);
+            --shadow-dark: rgba(0, 0, 0, 0.15);
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.3);
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--background-gradient);
+            color: var(--text-color);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+        
+        /* --- NUEVAS ANIMACIONES ESTÉTICAS --- */
+        @keyframes auroraBackground {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes gradientHeader {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(45deg, var(--primary-light), var(--background-color), #FFF, var(--primary-light));
+            background-size: 400% 400%;
+            animation: auroraBackground 20s ease infinite;
+            opacity: 0.15;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        /* Animaciones globales */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes fadeInScale {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        /* Página de registro */
+        .login-container {
+            display: flex;
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+            transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+        }
+        
+        .login-image {
+            flex: 1;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 50%, var(--secondary-color) 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: var(--white-color);
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            z-index: 2;
+            animation: fadeInScale 1s ease-out;
+        }
+        
+        .login-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="dots" width="10" height="10" patternUnits="userSpaceOnUse"><circle cx="5" cy="5" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100%" height="100%" fill="url(%23dots)"/></svg>');
+            opacity: 0.3;
+        }
+        
+        .login-image h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+            letter-spacing: -2px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .login-image p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 300;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .login-form {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+            position: relative;
+            z-index: 2;
+            animation: fadeInUp 1s ease-out 0.3s both;
+        }
+        
+        .form-wrapper {
+            width: 100%;
+            max-width: 450px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            padding: 50px 40px;
+            border-radius: 25px;
+            box-shadow: 0 20px 40px var(--shadow-dark);
+            border: 1px solid var(--glass-border);
+            transition: all 0.3s ease;
+        }
+        
+        .form-wrapper:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 30px 60px var(--shadow-dark);
+        }
+        
+        .form-wrapper h2 {
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            font-weight: 700;
+        }
+        
+        .role-selection {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        
+        .role-btn {
+            padding: 15px 25px;
+            background: var(--white-color);
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            cursor: pointer;
+            border-radius: 15px;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .role-btn.active {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: var(--white-color);
+            transform: scale(1.05);
+            box-shadow: 0 10px 25px var(--shadow-medium);
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 16px 20px;
+            border: 2px solid #E5E5E5;
+            border-radius: 12px;
+            font-size: 16px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--white-color);
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px var(--shadow-light);
+            transform: translateY(-2px);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: var(--white-color);
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn:hover {
+            background: linear-gradient(135deg, var(--primary-dark), var(--secondary-color));
+            transform: translateY(-3px);
+            box-shadow: 0 15px 35px var(--shadow-medium);
+        }
+
+        /* Página principal */
+        #ventasPage {
+            display: none;
+            min-height: 100vh;
+            animation: fadeInUp 0.8s ease-out;
+        }
+        
+        .header {
+            color: var(--white-color);
+            text-align: center;
+            padding: 40px 20px;
+            position: relative;
+            overflow: hidden;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark), var(--secondary-color));
+            background-size: 400% 400%;
+            animation: gradientHeader 10s ease infinite;
+            box-shadow: 0 5px 25px var(--shadow-medium);
+        }
+        
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            font-size: 2.8rem;
+            letter-spacing: -1px;
+            margin-bottom: 10px;
+            text-shadow: 0 3px 10px rgba(0,0,0,0.2);
+        }
+        
+        /* --- NUEVO ESTILO PARA EL CORREO --- */
+        .contacto-email {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+
+        .contacto-email a {
+            color: var(--white-color);
+            text-decoration: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+            transition: color 0.3s ease, border-bottom-color 0.3s ease;
+        }
+
+        .contacto-email a:hover {
+            color: #FFD1DC; /* Light pink */
+            border-bottom-color: #FFD1DC;
+        }
+        
+        .contenido-principal {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 60px 20px;
+            position: relative;
+        }
+        
+        .contenido-principal h3 {
+            text-align: center;
+            margin-bottom: 50px;
+            color: var(--primary-color);
+            font-size: 1.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            position: relative;
+            animation: fadeInUp 1s ease-out 0.2s both;
+            text-shadow: 0 2px 5px var(--shadow-light);
+        }
+        
+        .contenido-principal h3::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            border-radius: 2px;
+        }
+        
+        /* --- NUEVO ESTILO DE PRODUCTOS DESTACADOS --- */
+        .producto-destacado {
+            display: flex;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border-radius: 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            width: 85%;
+            max-width: 900px;
+            margin: 25px auto;
+            padding: 30px;
+            align-items: center;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            position: relative;
+            overflow: hidden;
+            animation: fadeInUp 0.8s ease-out;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+        }
+        
+        .producto-destacado:hover {
+            transform: translateY(-12px) scale(1.03);
+            box-shadow: 0 25px 50px var(--shadow-medium), 0 0 30px var(--shadow-light);
+        }
+        
+        .producto-imagen {
+            flex: 1;
+            max-width: 220px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .producto-imagen img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 15px;
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .producto-destacado:hover .producto-imagen img {
+            transform: scale(1.05) rotate(2deg);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+        }
+        
+        .producto-info {
+            flex: 2;
+            padding: 0 30px;
+        }
+        
+        .producto-titulo {
+            color: var(--primary-color);
+            font-size: 1.6rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            font-family: 'Playfair Display', serif;
+            line-height: 1.3;
+        }
+        
+        .producto-precio {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--secondary-color);
+            margin: 20px 0;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .producto-descripcion {
+            margin-bottom: 25px;
+            font-size: 15px;
+            line-height: 1.6;
+            color: var(--text-light);
+            font-weight: 400;
+        }
+        
+        .producto-etiqueta {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: var(--white-color);
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: 600;
+            margin-right: 10px;
+            margin-bottom: 15px;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 5px 15px var(--shadow-light);
+            transition: all 0.3s ease;
+        }
+        
+        .add-to-cart {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            color: var(--white-color);
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 20px var(--shadow-light);
+        }
+        
+        .add-to-cart:hover {
+            background: linear-gradient(135deg, var(--primary-dark), var(--secondary-color));
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 12px 30px var(--shadow-medium);
+        }
+        
+        /* Vistas de usuario y reseñas (sin cambios mayores) */
+        #clienteView, #vendedorView, .reseñas-container {
+            width: 85%;
+            max-width: 900px;
+            margin: 40px auto;
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(25px);
+            border-radius: 30px;
+            padding: 40px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            animation: fadeInScale 0.8s ease-out;
+        }
+
+        .reseñas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+        
+        .reseña-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(15px);
+            padding: 30px 25px;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.08);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .reseña-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 25px 45px rgba(255, 35, 94, 0.15);
+        }
+
+        .reseña-texto {
+            font-style: italic;
+            color: var(--text-light);
+        }
+
+        .reseña-rating {
+            color: var(--primary-color);
+            font-size: 1.2rem;
+            margin: 15px 0;
+        }
+
+        .reseña-autor {
+            font-weight: 600;
+            color: var(--secondary-color);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .login-container { flex-direction: column; }
+            .producto-destacado { flex-direction: column; padding: 25px 20px; width: 95%; }
+            .producto-imagen { margin-bottom: 25px; max-width: 180px; }
+            .producto-info { padding: 0; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <div id="registroPage" class="login-container">
+        <div class="login-image">
+            <h1>DAZZEL</h1>
+            <p>Registra tus datos para comenzar tu experiencia de belleza</p>
+        </div>
+        <div class="login-form">
+            <div class="form-wrapper">
+                <h2>Registro de Usuario</h2>
+                <div class="role-selection">
+                    <button type="button" id="clienteBtn" class="role-btn active" onclick="seleccionarRol('cliente')">Cliente</button>
+                    <button type="button" id="vendedorBtn" class="role-btn" onclick="seleccionarRol('vendedor')">Vendedor</button>
+                </div>
+                <form id="registrationForm">
+                    <div class="form-group">
+                        <label for="cedula">Cédula</label>
+                        <input type="text" id="cedula" name="cedula" required placeholder="Ingresa tu número de cédula">
+                    </div>
+                    <div class="form-group">
+                        <label for="nombre">Nombre Completo</label>
+                        <input type="text" id="nombre" name="nombre" required placeholder="Ingresa tu nombre completo">
+                    </div>
+                    <div class="form-group">
+                        <label for="telefono">Número de Teléfono</label>
+                        <input type="tel" id="telefono" name="telefono" required placeholder="Ingresa tu número de teléfono">
+                    </div>
+                    <button type="button" class="btn" onclick="validarFormulario()">Registrarse</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div id="vendedorRegistroAdicionalPage" style="display: none; min-height: 100vh; justify-content: center; align-items: center;">
+        <div class="form-wrapper">
+             <h2>Información Adicional de Vendedor</h2>
+            <form id="vendedorFormAdicional">
+                <div class="form-group">
+                    <label for="direccion">Dirección de Residencia</label>
+                    <input type="text" id="direccion" name="direccion" required placeholder="Ej: Calle 5 # 46 - 83">
+                </div>
+                <div class="form-group">
+                    <label for="fechaNacimiento">Fecha de Nacimiento</label>
+                    <input type="date" id="fechaNacimiento" name="fechaNacimiento" required>
+                </div>
+                <div class="form-group">
+                    <label for="hojaDeVida">Adjuntar Hoja de Vida (CV)</label>
+                    <input type="file" id="hojaDeVida" name="hojaDeVida" accept=".pdf,.doc,.docx">
+                </div>
+                <button type="button" class="btn" onclick="finalizarRegistroVendedor()">Completar Registro</button>
+            </form>
+        </div>
+    </div>
+
+
+    <div id="ventasPage">
+        <div class="header">
+            <h1>DAZZEL</h1>
+            <p id="usuarioNombre"></p>
+            <p id="usuarioRol" class="usuario-tipo"></p>
+            <p class="contacto-email">Contacto: <a href="mailto:Dazzel684@gmail.com">Dazzel684@gmail.com</a></p>
+        </div>
+        <div class="contenido-principal">
+            
+            <h3>PRODUCTOS DESTACADOS</h3>
+            
+            <div class="producto-destacado">
+                <div class="producto-imagen">
+                    <img src="https://placehold.co/400x400/FF235E/FFF?text=DAZZEL" alt="Producto de Belleza" />
+                </div>
+                <div class="producto-info">
+                    <div class="producto-etiqueta">¡NUEVO!</div>
+                    <div class="producto-etiqueta">DESTACADO</div>
+                    <h3 class="producto-titulo">NYX Professional Makeup Fat Oil Lip Drip</h3>
+                    <p class="producto-descripcion">Brillo labial de alta pigmentación con aceites nutritivos que hidrata y da volumen a tus labios.</p>
+                    <div class="producto-precio">$25.900 COP</div>
+                    <button class="add-to-cart">🛒 Añadir al Carrito</button>
+                </div>
+            </div>
+            
+            <div class="producto-destacado">
+                <div class="producto-imagen">
+                    <img src="https://placehold.co/400x400/FF235E/FFF?text=DAZZEL" alt="Producto de Belleza" />
+                </div>
+                <div class="producto-info">
+                    <div class="producto-etiqueta">PREMIUM</div>
+                    <h3 class="producto-titulo">SHEGLAM Base Líquida Soft Matte</h3>
+                    <p class="producto-descripcion">Base de maquillaje líquida con acabado mate suave y aplicador incorporado. Cobertura media-alta.</p>
+                    <div class="producto-precio">$28.500 COP</div>
+                    <button class="add-to-cart">🛒 Añadir al Carrito</button>
+                </div>
+            </div>
+            
+            <div class="producto-destacado">
+                <div class="producto-imagen">
+                    <img src="https://placehold.co/400x400/FF235E/FFF?text=DAZZEL" alt="Producto de Belleza" />
+                </div>
+                <div class="producto-info">
+                    <div class="producto-etiqueta">TOP SELLER</div>
+                    <h3 class="producto-titulo">Protini Polypeptide Cream</h3>
+                    <p class="producto-descripcion">Crema facial fortalecedora con 9 péptidos que mejora la firmeza y elasticidad de la piel.</p>
+                    <div class="producto-precio">$29.900 COP</div>
+                    <button class="add-to-cart">🛒 Añadir al Carrito</button>
+                </div>
+            </div>
+            
+            <div class="producto-destacado">
+                <div class="producto-imagen">
+                    <img src="https://placehold.co/400x400/FF235E/FFF?text=DAZZEL" alt="Producto de Belleza" />
+                </div>
+                <div class="producto-info">
+                    <div class="producto-etiqueta">OFERTA</div>
+                    <h3 class="producto-titulo">Set de Brochas Premium Rosa</h3>
+                    <p class="producto-descripcion">Set de 8 brochas profesionales con cerdas suaves y mango ergonómico en tono rosa pastel.</p>
+                    <div class="producto-precio">$22.900 COP</div>
+                    <button class="add-to-cart">🛒 Añadir al Carrito</button>
+                </div>
+            </div>
+            
+            <div class="producto-destacado">
+                <div class="producto-imagen">
+                    <img src="https://placehold.co/400x400/FF235E/FFF?text=DAZZEL" alt="Producto de Belleza" />
+                </div>
+                <div class="producto-info">
+                    <div class="producto-etiqueta">RECOMENDADO</div>
+                    <h3 class="producto-titulo">CeraVe Gel Limpiador Espumoso</h3>
+                    <p class="producto-descripcion">Limpiador facial espumoso para piel normal a grasa. Con 3 ceramidas esenciales y niacinamida.</p>
+                    <div class="producto-precio">$18.900 COP</div>
+                    <button class="add-to-cart">🛒 Añadir al Carrito</button>
+                </div>
+            </div>
+            
+            <div class="reseñas-container">
+                <h3>OPINIONES DE NUESTROS CLIENTES</h3>
+                <div class="reseñas-grid">
+                    <div class="reseña-card">
+                        <p class="reseña-texto">"¡Los productos son de una calidad increíble! Mi pedido llegó súper rápido. DAZZEL es mi nueva tienda favorita."</p>
+                        <div class="reseña-rating">★★★★★</div>
+                        <div class="reseña-autor">- Ana Pérez</div>
+                    </div>
+                    <div class="reseña-card">
+                        <p class="reseña-texto">"Me encanta la variedad. Encontré todo lo que necesitaba. La base de SHEGLAM es fantástica."</p>
+                        <div class="reseña-rating">★★★★★</div>
+                        <div class="reseña-autor">- Laura Gómez</div>
+                    </div>
+                    <div class="reseña-card">
+                        <p class="reseña-texto">"El set de brochas es maravilloso, súper suave y a un precio increíble. ¡Totalmente recomendados!"</p>
+                        <div class="reseña-rating">★★★★★</div>
+                        <div class="reseña-autor">- Sofía Castro</div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="clienteView"></div>
+            <div id="vendedorView"></div>
+        </div>
+    </div>
+
+    <script>
+        let rolSeleccionado = 'cliente';
+        let datosVendedor = {};
+        
+        function seleccionarRol(rol) {
+            rolSeleccionado = rol;
+            document.getElementById('clienteBtn').classList.toggle('active', rol === 'cliente');
+            document.getElementById('vendedorBtn').classList.toggle('active', rol === 'vendedor');
+        }
+        
+        function validarFormulario() {
+            const cedula = document.getElementById('cedula').value;
+            const nombre = document.getElementById('nombre').value;
+            const telefono = document.getElementById('telefono').value;
+
+            const cedulaRegex = /^\d{7,10}$/;
+            const nombreRegex = /^[a-zA-ZÀ-ÿ\s]+$/;
+            const telefonoRegex = /^\d{10}$/;
+
+            if (!cedulaRegex.test(cedula)) {
+                alert('Por favor, ingrese un número de cédula válido (solo números, entre 7 y 10 dígitos).');
+                return;
+            }
+            if (!nombreRegex.test(nombre)) {
+                alert('Por favor, ingrese un nombre válido (solo letras y espacios).');
+                return;
+            }
+            if (!telefonoRegex.test(telefono)) {
+                alert('Por favor, ingrese un número de teléfono válido (10 dígitos).');
+                return;
+            }
+
+            datosVendedor = { cedula, nombre, telefono };
+            const registroPage = document.getElementById('registroPage');
+            
+            registroPage.style.opacity = '0';
+            setTimeout(() => {
+                registroPage.style.display = 'none';
+                if (rolSeleccionado === 'cliente') {
+                    mostrarPaginaPrincipal('cliente');
+                } else {
+                    const vendedorRegistroPage = document.getElementById('vendedorRegistroAdicionalPage');
+                    vendedorRegistroPage.style.display = 'flex';
+                }
+            }, 400);
+        }
+
+        function finalizarRegistroVendedor() {
+            const direccion = document.getElementById('direccion').value;
+            const fechaNacimiento = document.getElementById('fechaNacimiento').value;
+
+            if (direccion.trim() === '' || fechaNacimiento.trim() === '') {
+                alert('Por favor, complete todos los campos requeridos del formulario adicional.');
+                return;
+            }
+            document.getElementById('vendedorRegistroAdicionalPage').style.display = 'none';
+            mostrarPaginaPrincipal('vendedor');
+        }
+
+        function mostrarPaginaPrincipal(rolFinal) {
+            const ventasPage = document.getElementById('ventasPage');
+            ventasPage.style.display = 'block';
+            
+            document.getElementById('usuarioNombre').textContent = `Bienvenido, ${datosVendedor.nombre}`;
+            
+            if (rolFinal === 'cliente') {
+                document.getElementById('usuarioRol').textContent = 'Rol: Cliente Premium';
+            } else {
+                document.getElementById('usuarioRol').textContent = 'Rol: Vendedor Profesional';
+            }
+        }
+    </script>
+</body>
+</html>
